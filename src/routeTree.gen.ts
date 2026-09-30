@@ -10,11 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArchitectureRouteImport } from './routes/architecture'
+import { Route as FutureRouteImport } from './routes/future'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProblemRouteImport } from './routes/problem'
+import { Route as TechnologiesRouteImport } from './routes/technologies'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArchitectureRoute = ArchitectureRouteImport.update({
+  id: '/architecture',
+  path: '/architecture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FutureRoute = FutureRouteImport.update({
+  id: '/future',
+  path: '/future',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProblemRoute = ProblemRouteImport.update({
@@ -22,31 +41,71 @@ const ProblemRoute = ProblemRouteImport.update({
   path: '/problem',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TechnologiesRoute = TechnologiesRouteImport.update({
+  id: '/technologies',
+  path: '/technologies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/architecture': typeof ArchitectureRoute
+  '/future': typeof FutureRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
+  '/technologies': typeof TechnologiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/architecture': typeof ArchitectureRoute
+  '/future': typeof FutureRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
+  '/technologies': typeof TechnologiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/architecture': typeof ArchitectureRoute
+  '/future': typeof FutureRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
+  '/technologies': typeof TechnologiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/problem'
+  fullPaths:
+    | '/'
+    | '/architecture'
+    | '/future'
+    | '/how-it-works'
+    | '/problem'
+    | '/technologies'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/problem'
-  id: '__root__' | '/' | '/problem'
+  to:
+    | '/'
+    | '/architecture'
+    | '/future'
+    | '/how-it-works'
+    | '/problem'
+    | '/technologies'
+  id:
+    | '__root__'
+    | '/'
+    | '/architecture'
+    | '/future'
+    | '/how-it-works'
+    | '/problem'
+    | '/technologies'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchitectureRoute: typeof ArchitectureRoute
+  FutureRoute: typeof FutureRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   ProblemRoute: typeof ProblemRoute
+  TechnologiesRoute: typeof TechnologiesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +117,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/architecture': {
+      id: '/architecture'
+      path: '/architecture'
+      fullPath: '/architecture'
+      preLoaderRoute: typeof ArchitectureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/future': {
+      id: '/future'
+      path: '/future'
+      fullPath: '/future'
+      preLoaderRoute: typeof FutureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/problem': {
       id: '/problem'
       path: '/problem'
@@ -65,12 +145,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProblemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/technologies': {
+      id: '/technologies'
+      path: '/technologies'
+      fullPath: '/technologies'
+      preLoaderRoute: typeof TechnologiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchitectureRoute: ArchitectureRoute,
+  FutureRoute: FutureRoute,
+  HowItWorksRoute: HowItWorksRoute,
   ProblemRoute: ProblemRoute,
+  TechnologiesRoute: TechnologiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
