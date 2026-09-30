@@ -62,7 +62,7 @@ export function buildWarehouse(): Warehouse {
         { x, y: block.y + 1 },
       ];
       for (const c of cells) {
-        blocked[c.y][c.x] = true;
+        blocked[c.y]![c.x] = true;
         shelfByCell.set(key(c), label);
       }
       shelves.push({ label, cells, access: { x, y: block.y - 1 } });
@@ -76,7 +76,7 @@ export function buildWarehouse(): Warehouse {
     { x: 6, y: 14 },
     { x: 23, y: 7 },
   ]) {
-    blocked[o.y][o.x] = true;
+    blocked[o.y]![o.x] = true;
   }
 
   return { cols: COLS, rows: ROWS, blocked, shelves, shelfByCell };
@@ -108,13 +108,13 @@ export function predictCongestion(
 
   for (let y = 0; y < w.rows; y += 1) {
     for (let x = 0; x < w.cols; x += 1) {
-      if (w.blocked[y][x]) continue;
+      if (w.blocked[y]![x]) continue;
       let v = 0;
       for (const h of hotspots) {
         const d = Math.hypot(x - h.x, y - h.y);
         if (d < h.r) v += (1 - d / h.r) * intensity;
       }
-      field[y][x] = Math.min(1, v + rnd() * 0.06);
+      field[y]![x] = Math.min(1, v + rnd() * 0.06);
     }
   }
   return field;
@@ -152,7 +152,7 @@ export function aStar(
   weight = CONGESTION_WEIGHT,
 ): AStarResult {
   const inBounds = (c: Cell) => c.x >= 0 && c.y >= 0 && c.x < w.cols && c.y < w.rows;
-  const walkable = (c: Cell) => inBounds(c) && !w.blocked[c.y][c.x];
+  const walkable = (c: Cell) => inBounds(c) && !w.blocked[c.y]![c.x];
   if (!walkable(start) || !walkable(goal)) {
     return { path: [], explored: [], steps: 0, cost: 0, penalty: 0, found: false };
   }
@@ -202,7 +202,7 @@ export function aStar(
       if (!walkable(n)) continue;
       const nk = key(n);
       if (closed.has(nk)) continue;
-      const pen = congestion ? weight * congestion[n.y][n.x] : 0;
+      const pen = congestion ? weight * congestion[n.y]![n.x] : 0;
       const tentative = (gScore.get(ck) ?? Infinity) + 1 + pen;
       if (tentative < (gScore.get(nk) ?? Infinity)) {
         gScore.set(nk, tentative);
