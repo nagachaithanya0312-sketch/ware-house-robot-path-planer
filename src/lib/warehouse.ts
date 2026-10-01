@@ -202,7 +202,7 @@ export function aStar(
       if (!walkable(n)) continue;
       const nk = key(n);
       if (closed.has(nk)) continue;
-      const pen = congestion ? weight * congestion[n.y]![n.x] : 0;
+      const pen = congestion ? weight * congestion[n.y]![n.x]! : 0;
       const tentative = (gScore.get(ck) ?? Infinity) + 1 + pen;
       if (tentative < (gScore.get(nk) ?? Infinity)) {
         gScore.set(nk, tentative);
@@ -283,7 +283,7 @@ export function aStarTrace(
         if (!walkable(n)) continue;
         const nk = key(n);
         if (closed.has(nk)) continue;
-        const pen = congestion ? weight * congestion[n.y]![n.x] : 0;
+        const pen = congestion ? weight * congestion[n.y]![n.x]! : 0;
         const tentative = (gScore.get(ck) ?? Infinity) + 1 + pen;
         if (tentative < (gScore.get(nk) ?? Infinity)) {
           gScore.set(nk, tentative);

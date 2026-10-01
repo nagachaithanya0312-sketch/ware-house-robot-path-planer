@@ -99,7 +99,7 @@ export function WarehouseView({
       {congestion
         ? congestion.map((row, y) =>
             row.map((v, x) => {
-              if (v < 0.08 || warehouse.blocked[y][x]) return null;
+              if (v < 0.08 || warehouse.blocked[y]![x]) return null;
               const band = congestionBand(v);
               const fill =
                 band === "HIGH" ? "var(--danger)" : band === "MEDIUM" ? "var(--warning)" : "var(--cyan)";
@@ -217,8 +217,8 @@ export function WarehouseView({
             data-cursor-hot={onPickShelf ? "" : undefined}
           >
             <rect
-              x={top.x * S + 1.5}
-              y={top.y * S + 1.5}
+              x={top!.x * S + 1.5}
+              y={top!.y * S + 1.5}
               width={S - 3}
               height={S * 2 - 3}
               rx="2"
@@ -228,16 +228,16 @@ export function WarehouseView({
               strokeWidth={isGoal ? 1.6 : 0.8}
             />
             <line
-              x1={top.x * S + 4}
-              y1={top.y * S + S}
-              x2={top.x * S + S - 4}
-              y2={top.y * S + S}
+              x1={top!.x * S + 4}
+              y1={top!.y * S + S}
+              x2={top!.x * S + S - 4}
+              y2={top!.y * S + S}
               stroke="var(--cyan)"
               strokeOpacity="0.18"
             />
             <text
-              x={top.x * S + S / 2}
-              y={top.y * S + S + 3.2}
+              x={top!.x * S + S / 2}
+              y={top!.y * S + S + 3.2}
               textAnchor="middle"
               fontSize="7"
               fontFamily="var(--font-mono)"
@@ -386,7 +386,7 @@ export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
       setArrived(false);
       return;
     }
-    setPos({ x: path[0].x, y: path[0].y });
+    setPos({ x: path[0]!.x, y: path[0]!.y });
     setArrived(false);
     if (!running || path.length < 2) return;
 
@@ -401,8 +401,8 @@ export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
       const d = ease(u) * (path.length - 1);
       const i = Math.min(path.length - 2, Math.floor(d));
       const f = d - i;
-      const a = path[i];
-      const b = path[i + 1];
+      const a = path[i]!;
+      const b = path[i + 1]!;
       setPos({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
       if (u < 1) raf = requestAnimationFrame(tick);
       else setArrived(true);
