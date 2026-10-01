@@ -216,7 +216,127 @@ export function aStar(
   return { path: [], explored, steps: 0, cost: 0, penalty: 0, found: false };
 }
 
+/**
+ * A* trace for the search-wavefront visualization.
+ * Every frame is one expansion: the cell taken off the priority queue,
+ * the frontier (open set) at that moment and the g-cost reached.
+ */
+export type WaveFrame = {
+  expanded: Cell;
+  frontier: Cell[];
+  g: number;
+  f: number;
+};
+
+export type WaveTrace = {
+  frames: WaveFrame[];
+  result: AStarResult;
+};
+
+export function aStarTrace(
+  w: Warehouse,
+  start: Cell,
+  goal: Cell,
+  congestion: number[][] | null,
+  weight = CONGESTION_WEIGHT,
+): WaveTrace {
+  const empty: AStarResult = {
+    path: [],
+    explored: [],
+    steps: 0,
+    cost: 0,
+    penalty: 0,
+    found: false,
+  };
+  const inBounds = (c: Cell) => c.x >= 0 && c.y >= 0 && c.x < w.cols && c.y < w.rows;
+  const walkable = (c: Cell) => inBounds(c) && !w.blocked[c.y]![c.x];
+  if (!walkable(start) || !walkable(goal)) return { frames: [], result: empty };
+
+  const h = (c: Cell) => Math.abs(c.x - goal.x) + Math.abs(c.y - goal.y);
+  const gScore = new Map<string, number>([[key(start), 0]]);
+  const penScore = new Map<string, number>([[key(start), 0]]);
+  const cameFrom = new Map<string, Cell>();
+  const open: { cell: Cell; f: number }[] = [{ cell: start, f: h(start) }];
+  const closed = new Set<string>();
+  const explored: Cell[] = [];
+  const frames: WaveFrame[] = [];
+
+  while (open.length) {
+    open.sort((a, b) => a.f - b.f);
+    const head = open.shift()!;
+    const current = head.cell;
+    const ck = key(current);
+    if (closed.has(ck)) continue;
+    closed.add(ck);
+    explored.push(current);
+
+    const reachedGoal = current.x === goal.x && current.y === goal.y;
+
+    if (!reachedGoal) {
+      const neighbors: Cell[] = [
+        { x: current.x + 1, y: current.y },
+        { x: current.x - 1, y: current.y },
+        { x: current.x, y: current.y + 1 },
+        { x: current.x, y: current.y - 1 },
+      ];
+      for (const n of neighbors) {
+        if (!walkable(n)) continue;
+        const nk = key(n);
+        if (closed.has(nk)) continue;
+        const pen = congestion ? weight * congestion[n.y]![n.x] : 0;
+        const tentative = (gScore.get(ck) ?? Infinity) + 1 + pen;
+        if (tentative < (gScore.get(nk) ?? Infinity)) {
+          gScore.set(nk, tentative);
+          penScore.set(nk, (penScore.get(ck) ?? 0) + pen);
+          cameFrom.set(nk, current);
+          open.push({ cell: n, f: tentative + h(n) });
+        }
+      }
+    }
+
+    const seen = new Set<string>();
+    const frontier: Cell[] = [];
+    for (const o of open) {
+      const ok = key(o.cell);
+      if (closed.has(ok) || seen.has(ok)) continue;
+      seen.add(ok);
+      frontier.push(o.cell);
+    }
+
+    frames.push({
+      expanded: current,
+      frontier,
+      g: gScore.get(ck) ?? 0,
+      f: head.f,
+    });
+
+    if (reachedGoal) {
+      const path: Cell[] = [current];
+      let cur = ck;
+      while (cameFrom.has(cur)) {
+        const prev = cameFrom.get(cur)!;
+        path.unshift(prev);
+        cur = key(prev);
+      }
+      return {
+        frames,
+        result: {
+          path,
+          explored,
+          steps: path.length - 1,
+          cost: gScore.get(ck) ?? 0,
+          penalty: penScore.get(ck) ?? 0,
+          found: true,
+        },
+      };
+    }
+  }
+
+  return { frames, result: { ...empty, explored } };
+}
+
 export const DEFAULT_START: Cell = { x: 1, y: 1 };
+
 
 export function shelfByLabel(w: Warehouse, label: string) {
   return w.shelves.find((s) => s.label === label);
