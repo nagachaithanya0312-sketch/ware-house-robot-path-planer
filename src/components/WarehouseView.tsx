@@ -118,19 +118,92 @@ export function WarehouseView({
           )
         : null}
 
-      {/* explored nodes */}
-      {exploredSlice.map((c) => (
-        <rect
-          key={`e${c.x}-${c.y}`}
-          x={c.x * S + S * 0.3}
-          y={c.y * S + S * 0.3}
-          width={S * 0.4}
-          height={S * 0.4}
-          rx="1"
-          fill="var(--indigo)"
-          opacity="0.5"
-        />
+      {/* settled (closed) nodes — the wake left behind the search wave */}
+      {exploredSlice.map((c, i) => {
+        const age = shown > 1 ? i / (shown - 1) : 1; // 0 = oldest, 1 = newest
+        const size = S * (0.26 + age * 0.18);
+        return (
+          <rect
+            key={`e${c.x}-${c.y}`}
+            x={c.x * S + (S - size) / 2}
+            y={c.y * S + (S - size) / 2}
+            width={size}
+            height={size}
+            rx="1"
+            fill={age > 0.88 ? "var(--electric)" : "var(--indigo)"}
+            opacity={0.24 + age * 0.5}
+          />
+        );
+      })}
+
+      {/* live wavefront — the open set A* will expand next */}
+      {frontier.map((c) => (
+        <g key={`f${c.x}-${c.y}`}>
+          <rect
+            x={c.x * S + S * 0.14}
+            y={c.y * S + S * 0.14}
+            width={S * 0.72}
+            height={S * 0.72}
+            rx="2"
+            fill="var(--cyan)"
+            opacity="0.16"
+          />
+          <rect
+            x={c.x * S + S * 0.14}
+            y={c.y * S + S * 0.14}
+            width={S * 0.72}
+            height={S * 0.72}
+            rx="2"
+            fill="none"
+            stroke="var(--cyan)"
+            strokeWidth="0.9"
+            strokeOpacity="0.85"
+            filter="url(#wv-glow)"
+          />
+        </g>
       ))}
+
+      {/* expansion ripple at the cell being processed */}
+      {wavePulse ? (
+        <g>
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.32}
+            fill="var(--electric)"
+            opacity="0.5"
+          />
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.3}
+            fill="none"
+            stroke="var(--cyan)"
+            strokeWidth="1.3"
+          >
+            <animate attributeName="r" values={`${S * 0.3};${S * 1.5}`} dur="0.9s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.9;0" dur="0.9s" repeatCount="indefinite" />
+          </circle>
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.3}
+            fill="none"
+            stroke="var(--violet)"
+            strokeWidth="1"
+          >
+            <animate
+              attributeName="r"
+              values={`${S * 0.3};${S * 1.5}`}
+              dur="0.9s"
+              begin="0.45s"
+              repeatCount="indefinite"
+            />
+            <animate attributeName="opacity" values="0.8;0" dur="0.9s" begin="0.45s" repeatCount="indefinite" />
+          </circle>
+        </g>
+      ) : null}
+
 
       {/* shelves */}
       {warehouse.shelves.map((s) => {
