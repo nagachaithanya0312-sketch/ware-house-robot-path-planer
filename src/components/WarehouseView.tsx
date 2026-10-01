@@ -8,6 +8,10 @@ export type ViewProps = {
   congestion?: number[][] | null;
   explored?: Cell[];
   exploredCount?: number;
+  /** open-set cells at the current search step — drawn as the live wavefront */
+  frontier?: Cell[];
+  /** cell expanded at the current step — emits the wave ripple */
+  wavePulse?: Cell | null;
   path?: Cell[];
   pathProgress?: number; // 0..1 reveal of final route
   robot?: { x: number; y: number } | null;
@@ -17,6 +21,7 @@ export type ViewProps = {
   onPickShelf?: (label: string) => void;
   className?: string;
 };
+
 
 export function WarehouseView({
   warehouse,
