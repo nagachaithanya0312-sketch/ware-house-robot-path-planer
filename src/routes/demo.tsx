@@ -74,7 +74,7 @@ function DemoPage() {
     if (!playing || done) return;
     timer.current = window.setInterval(
       () => setStep((s) => Math.min(total, s + 1)),
-      SPEEDS[speed].ms,
+      SPEEDS[speed]!.ms,
     );
     return () => {
       if (timer.current) window.clearInterval(timer.current);
