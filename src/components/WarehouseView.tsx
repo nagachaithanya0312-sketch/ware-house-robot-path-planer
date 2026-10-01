@@ -28,7 +28,10 @@ export function WarehouseView({
   congestion = null,
   explored = [],
   exploredCount,
+  frontier = [],
+  wavePulse = null,
   path = [],
+
   pathProgress = 1,
   robot = null,
   start = null,
