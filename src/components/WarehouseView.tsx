@@ -8,6 +8,10 @@ export type ViewProps = {
   congestion?: number[][] | null;
   explored?: Cell[];
   exploredCount?: number;
+  /** open-set cells at the current search step — drawn as the live wavefront */
+  frontier?: Cell[];
+  /** cell expanded at the current step — emits the wave ripple */
+  wavePulse?: Cell | null;
   path?: Cell[];
   pathProgress?: number; // 0..1 reveal of final route
   robot?: { x: number; y: number } | null;
@@ -18,12 +22,16 @@ export type ViewProps = {
   className?: string;
 };
 
+
 export function WarehouseView({
   warehouse,
   congestion = null,
   explored = [],
   exploredCount,
+  frontier = [],
+  wavePulse = null,
   path = [],
+
   pathProgress = 1,
   robot = null,
   start = null,
@@ -91,7 +99,7 @@ export function WarehouseView({
       {congestion
         ? congestion.map((row, y) =>
             row.map((v, x) => {
-              if (v < 0.08 || warehouse.blocked[y][x]) return null;
+              if (v < 0.08 || warehouse.blocked[y]![x]) return null;
               const band = congestionBand(v);
               const fill =
                 band === "HIGH" ? "var(--danger)" : band === "MEDIUM" ? "var(--warning)" : "var(--cyan)";
@@ -110,19 +118,92 @@ export function WarehouseView({
           )
         : null}
 
-      {/* explored nodes */}
-      {exploredSlice.map((c) => (
-        <rect
-          key={`e${c.x}-${c.y}`}
-          x={c.x * S + S * 0.3}
-          y={c.y * S + S * 0.3}
-          width={S * 0.4}
-          height={S * 0.4}
-          rx="1"
-          fill="var(--indigo)"
-          opacity="0.5"
-        />
+      {/* settled (closed) nodes — the wake left behind the search wave */}
+      {exploredSlice.map((c, i) => {
+        const age = shown > 1 ? i / (shown - 1) : 1; // 0 = oldest, 1 = newest
+        const size = S * (0.26 + age * 0.18);
+        return (
+          <rect
+            key={`e${c.x}-${c.y}`}
+            x={c.x * S + (S - size) / 2}
+            y={c.y * S + (S - size) / 2}
+            width={size}
+            height={size}
+            rx="1"
+            fill={age > 0.88 ? "var(--electric)" : "var(--indigo)"}
+            opacity={0.24 + age * 0.5}
+          />
+        );
+      })}
+
+      {/* live wavefront — the open set A* will expand next */}
+      {frontier.map((c) => (
+        <g key={`f${c.x}-${c.y}`}>
+          <rect
+            x={c.x * S + S * 0.14}
+            y={c.y * S + S * 0.14}
+            width={S * 0.72}
+            height={S * 0.72}
+            rx="2"
+            fill="var(--cyan)"
+            opacity="0.16"
+          />
+          <rect
+            x={c.x * S + S * 0.14}
+            y={c.y * S + S * 0.14}
+            width={S * 0.72}
+            height={S * 0.72}
+            rx="2"
+            fill="none"
+            stroke="var(--cyan)"
+            strokeWidth="0.9"
+            strokeOpacity="0.85"
+            filter="url(#wv-glow)"
+          />
+        </g>
       ))}
+
+      {/* expansion ripple at the cell being processed */}
+      {wavePulse ? (
+        <g>
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.32}
+            fill="var(--electric)"
+            opacity="0.5"
+          />
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.3}
+            fill="none"
+            stroke="var(--cyan)"
+            strokeWidth="1.3"
+          >
+            <animate attributeName="r" values={`${S * 0.3};${S * 1.5}`} dur="0.9s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.9;0" dur="0.9s" repeatCount="indefinite" />
+          </circle>
+          <circle
+            cx={wavePulse.x * S + S / 2}
+            cy={wavePulse.y * S + S / 2}
+            r={S * 0.3}
+            fill="none"
+            stroke="var(--violet)"
+            strokeWidth="1"
+          >
+            <animate
+              attributeName="r"
+              values={`${S * 0.3};${S * 1.5}`}
+              dur="0.9s"
+              begin="0.45s"
+              repeatCount="indefinite"
+            />
+            <animate attributeName="opacity" values="0.8;0" dur="0.9s" begin="0.45s" repeatCount="indefinite" />
+          </circle>
+        </g>
+      ) : null}
+
 
       {/* shelves */}
       {warehouse.shelves.map((s) => {
@@ -136,8 +217,8 @@ export function WarehouseView({
             data-cursor-hot={onPickShelf ? "" : undefined}
           >
             <rect
-              x={top.x * S + 1.5}
-              y={top.y * S + 1.5}
+              x={top!.x * S + 1.5}
+              y={top!.y * S + 1.5}
               width={S - 3}
               height={S * 2 - 3}
               rx="2"
@@ -147,16 +228,16 @@ export function WarehouseView({
               strokeWidth={isGoal ? 1.6 : 0.8}
             />
             <line
-              x1={top.x * S + 4}
-              y1={top.y * S + S}
-              x2={top.x * S + S - 4}
-              y2={top.y * S + S}
+              x1={top!.x * S + 4}
+              y1={top!.y * S + S}
+              x2={top!.x * S + S - 4}
+              y2={top!.y * S + S}
               stroke="var(--cyan)"
               strokeOpacity="0.18"
             />
             <text
-              x={top.x * S + S / 2}
-              y={top.y * S + S + 3.2}
+              x={top!.x * S + S / 2}
+              y={top!.y * S + S + 3.2}
               textAnchor="middle"
               fontSize="7"
               fontFamily="var(--font-mono)"
@@ -305,7 +386,7 @@ export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
       setArrived(false);
       return;
     }
-    setPos({ x: path[0].x, y: path[0].y });
+    setPos({ x: path[0]!.x, y: path[0]!.y });
     setArrived(false);
     if (!running || path.length < 2) return;
 
@@ -320,8 +401,8 @@ export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
       const d = ease(u) * (path.length - 1);
       const i = Math.min(path.length - 2, Math.floor(d));
       const f = d - i;
-      const a = path[i];
-      const b = path[i + 1];
+      const a = path[i]!;
+      const b = path[i + 1]!;
       setPos({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
       if (u < 1) raf = requestAnimationFrame(tick);
       else setArrived(true);

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as FutureRouteImport } from './routes/future'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ProblemRouteImport } from './routes/problem'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ArchitectureRoute = ArchitectureRouteImport.update({
   id: '/architecture',
   path: '/architecture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FutureRoute = FutureRouteImport.update({
@@ -50,6 +56,7 @@ const TechnologiesRoute = TechnologiesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/architecture': typeof ArchitectureRoute
+  '/demo': typeof DemoRoute
   '/future': typeof FutureRoute
   '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/architecture': typeof ArchitectureRoute
+  '/demo': typeof DemoRoute
   '/future': typeof FutureRoute
   '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/architecture': typeof ArchitectureRoute
+  '/demo': typeof DemoRoute
   '/future': typeof FutureRoute
   '/how-it-works': typeof HowItWorksRoute
   '/problem': typeof ProblemRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/architecture'
+    | '/demo'
     | '/future'
     | '/how-it-works'
     | '/problem'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/architecture'
+    | '/demo'
     | '/future'
     | '/how-it-works'
     | '/problem'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/architecture'
+    | '/demo'
     | '/future'
     | '/how-it-works'
     | '/problem'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ArchitectureRoute: typeof ArchitectureRoute
+  DemoRoute: typeof DemoRoute
   FutureRoute: typeof FutureRoute
   HowItWorksRoute: typeof HowItWorksRoute
   ProblemRoute: typeof ProblemRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/architecture'
       fullPath: '/architecture'
       preLoaderRoute: typeof ArchitectureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/future': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ArchitectureRoute: ArchitectureRoute,
+  DemoRoute: DemoRoute,
   FutureRoute: FutureRoute,
   HowItWorksRoute: HowItWorksRoute,
   ProblemRoute: ProblemRoute,

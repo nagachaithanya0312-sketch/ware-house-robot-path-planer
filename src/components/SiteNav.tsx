@@ -21,7 +21,6 @@ const items = [
   { to: "/demo", label: "DEMO", Icon: Play },
   { to: "/architecture", label: "ARCHITECTURE", Icon: Network },
   { to: "/technologies", label: "TECHNOLOGIES", Icon: Cpu },
-  { to: "/team", label: "TEAM", Icon: Users },
   { to: "/future", label: "FUTURE", Icon: Target },
 ] as const;
 

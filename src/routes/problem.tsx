@@ -46,7 +46,7 @@ function ProblemPage() {
   const active = view === "A" ? routeA : routeB;
 
   const congestionOf = (path: Cell[]) =>
-    path.reduce((sum, c) => sum + congestion[c.y][c.x], 0);
+    path.reduce((sum, c) => sum + (congestion[c.y]?.[c.x] ?? 0), 0);
 
   const rows = [
     {
