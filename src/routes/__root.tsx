@@ -7,14 +7,14 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SystemBackground } from "@/components/SystemBackground";
-import { RobotCursor } from "@/components/RobotCursor";
 import { SiteNav } from "@/components/SiteNav";
 import { IntroScene } from "@/components/IntroScene";
+import { Volume2, VolumeX } from "lucide-react";
 
 function NotFoundComponent() {
   return (
@@ -114,42 +114,114 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [entered, setEntered] = useState(true);
+  const [entered, setEntered] = useState(false);
   const [ready, setReady] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    const seen = window.sessionStorage.getItem("wrpp-entered") === "1";
-    setEntered(seen);
     setReady(true);
+    
+    // Initialize audio subtly
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = 0;
+      audio.loop = true;
+      
+      const fadeIn = () => {
+        let vol = 0;
+        const targetVol = 0.25;
+        const steps = 60;
+        const stepTime = 3000 / steps; // 3 seconds total
+        
+        audio.volume = 0;
+        const fadeInterval = setInterval(() => {
+          vol += (targetVol / steps);
+          if (vol >= targetVol) {
+            audio.volume = targetVol;
+            clearInterval(fadeInterval);
+          } else {
+            audio.volume = vol;
+          }
+        }, stepTime);
+      };
+
+      const p = audio.play();
+      if (p !== undefined) {
+        p.then(() => fadeIn()).catch(() => {
+          // Autoplay prevented by browser without interaction
+          const onInteract = () => {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+              playPromise.then(() => fadeIn()).catch(() => {});
+            }
+          };
+          document.addEventListener('click', onInteract, { once: true, capture: true });
+          document.addEventListener('keydown', onInteract, { once: true, capture: true });
+        });
+      }
+    }
   }, []);
 
   const handleEnter = () => {
-    window.sessionStorage.setItem("wrpp-entered", "1");
     setEntered(true);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (audioRef.current.paused && !entered) {
+        audioRef.current.play().catch(() => {});
+      }
+      audioRef.current.muted = !audioRef.current.muted;
+      setMuted(audioRef.current.muted);
+    }
   };
 
   return (
     <QueryClientProvider client={queryClient}>
       <SystemBackground />
-      <RobotCursor />
+      <audio ref={audioRef} src="/moon.mp3" preload="auto" muted={muted} />
       {ready && !entered ? <IntroScene onEnter={handleEnter} /> : null}
       <div
-        className={`flex min-h-screen flex-col transition-all duration-1000 ease-out ${
-          ready && !entered ? "scale-[0.98] opacity-0" : "scale-100 opacity-100"
+        className={`flex min-h-screen flex-col transition-all duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          ready && !entered ? "scale-[0.96] opacity-0 blur-[4px] pointer-events-none" : "scale-100 opacity-100 blur-none"
         }`}
       >
-        <SiteNav />
+        <SiteNav onLogoClick={() => {
+          setEntered(false);
+          if (audioRef.current) {
+            audioRef.current.volume = 0.25; // Resume at comfortable volume
+            const p = audioRef.current.play();
+            if (p !== undefined) p.catch(() => {});
+          }
+        }} />
         <main className="flex-1">
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </main>
         <footer className="border-t border-border/70 px-4 py-6 sm:px-6">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3">
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-4">
             <span className="label-tech">WAREHOUSE ROBOT PATH PLANNER — COLLEGE PROJECT</span>
-            <span className="label-tech text-cyan">
-              <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-success align-middle" />
-              SYSTEM ONLINE
-            </span>
+            <div className="flex items-center gap-6">
+              {!entered && (
+                <button 
+                  onClick={toggleMute}
+                  className="label-tech flex items-center gap-2 hover:text-cyan transition-colors"
+                  title="Toggle Background Music"
+                >
+                  {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  <span>{muted ? "AUDIO OFF" : "AUDIO ON"}</span>
+                </button>
+              )}
+              <span className="label-tech text-cyan">
+                <span className="mr-2 inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-success align-middle" />
+                SYSTEM ONLINE
+              </span>
+            </div>
           </div>
         </footer>
       </div>

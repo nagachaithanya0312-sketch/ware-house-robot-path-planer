@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Cpu, Route as RouteIcon, ScanLine } from "lucide-react";
 import heroImg from "@/assets/warehouse-hero.jpg";
 import { WarehouseView, useRobotWalk } from "@/components/WarehouseView";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import {
   aStar,
   buildWarehouse,
@@ -44,7 +45,7 @@ function Home() {
   );
 
   const [cycle, setCycle] = useState(0);
-  const { pos, arrived } = useRobotWalk(plan.path, true, 3.4);
+  const { ref: robotRef, arrived } = useRobotWalk(plan.path, true, 1.2);
 
   useEffect(() => {
     if (!arrived) return;
@@ -55,171 +56,224 @@ function Home() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:py-16">
       {/* ---------- hero ---------- */}
-      <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <div className="animate-rise">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-8 bg-cyan/60" />
-            <span className="label-tech text-cyan">PATH PLANNING ENGINE / AI NAVIGATION</span>
+      <RevealOnScroll>
+        <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-8 bg-cyan/60" />
+              <span className="label-tech text-cyan">PATH PLANNING ENGINE / AI NAVIGATION</span>
+            </div>
+            <h1 className="mt-5 font-display text-[2rem] leading-[1.02] font-black tracking-tight sm:text-5xl lg:text-[3.4rem]">
+              INTELLIGENT PATH PLANNING
+              <span className="mt-2 block text-gradient">FOR WAREHOUSE ROBOTS</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-base text-secondary-foreground/90 sm:text-lg">
+              Find efficient, collision-free routes by combining A* search with congestion-aware path
+              planning.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/demo" className="ctrl ctrl-primary">
+                RUN LIVE DEMO <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <Link to="/how-it-works" className="ctrl ctrl-violet">
+                EXPLORE SYSTEM
+              </Link>
+            </div>
+
+            <RevealOnScroll cascade>
+              <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+                {[
+                  { k: "ALGORITHM", v: "A*" },
+                  { k: "GRAPH", v: "GRID" },
+                  { k: "COST MODEL", v: "g + h + P" },
+                  { k: "MODE", v: "AUTONOMOUS" },
+                ].map((s) => (
+                  <div key={s.k} className="border-l border-cyan/25 pl-3">
+                    <dt className="label-tech text-[0.58rem]">{s.k}</dt>
+                    <dd className="mt-1 font-display text-sm font-bold text-cyan">{s.v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </RevealOnScroll>
           </div>
-          <h1 className="mt-5 font-display text-[2rem] leading-[1.02] font-black tracking-tight sm:text-5xl lg:text-[3.4rem]">
-            INTELLIGENT PATH PLANNING
-            <span className="mt-2 block text-gradient">FOR WAREHOUSE ROBOTS</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-base text-secondary-foreground/90 sm:text-lg">
-            Find efficient, collision-free routes by combining A* search with congestion-aware path
-            planning.
-          </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/demo" className="ctrl ctrl-primary">
-              RUN LIVE DEMO <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-            <Link to="/how-it-works" className="ctrl ctrl-violet">
-              EXPLORE SYSTEM
-            </Link>
-          </div>
-
-          <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-            {[
-              { k: "ALGORITHM", v: "A*" },
-              { k: "GRAPH", v: "GRID" },
-              { k: "COST MODEL", v: "g + h + P" },
-              { k: "MODE", v: "AUTONOMOUS" },
-            ].map((s) => (
-              <div key={s.k} className="border-l border-cyan/25 pl-3">
-                <dt className="label-tech text-[0.58rem]">{s.k}</dt>
-                <dd className="mt-1 font-display text-sm font-bold text-cyan">{s.v}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* project image, integrated with perspective + scanlines */}
-        <figure className="animate-rise relative" style={{ animationDelay: "0.15s" }}>
-          <div
-            className="scanline-overlay sweep-hover corner-frame overflow-hidden rounded-lg border border-cyan/25"
-            style={{ transform: "perspective(1200px) rotateY(-5deg) rotateX(2deg)" }}
-          >
-            <img
-              src={heroImg}
-              width={1280}
-              height={960}
-              alt="Autonomous warehouse robot following a projected navigation path between storage racks"
-              className="h-auto w-full"
+          {/* project image, integrated with perspective + scanlines */}
+          <figure className="relative">
+            <div
+              className="scanline-overlay sweep-hover corner-frame overflow-hidden rounded-lg border border-cyan/25"
+              style={{ transform: "perspective(1200px) rotateY(-5deg) rotateX(2deg)" }}
+            >
+              <img
+                src={heroImg}
+                width={1280}
+                height={960}
+                alt="Autonomous warehouse robot following a projected navigation path between storage racks"
+                className="h-auto w-full transition-all duration-[1.5s] ease-[cubic-bezier(0.22,1,0.36,1)] scale-[1.05] -translate-x-4 opacity-0 group-[.is-revealed]:scale-100 group-[.is-revealed]:translate-x-0 group-[.is-revealed]:opacity-100 animate-slide-lr"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,oklch(0.12_0.022_265/0.75),transparent_60%)]" />
+              <figcaption className="absolute bottom-0 left-0 right-0 flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                <span className="label-tech text-cyan">WAREHOUSE FLOOR / LIVE FEED</span>
+                <span className="label-tech text-[0.58rem]">AUTONOMOUS TRANSPORT UNIT</span>
+              </figcaption>
+            </div>
+            <span
+              className="pointer-events-none absolute -inset-4 -z-10 rounded-xl opacity-60 blur-2xl"
+              style={{ background: "radial-gradient(circle at 70% 30%, var(--violet), transparent 65%)" }}
             />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,oklch(0.12_0.022_265/0.75),transparent_60%)]" />
-            <figcaption className="absolute bottom-0 left-0 right-0 flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-              <span className="label-tech text-cyan">WAREHOUSE FLOOR / LIVE FEED</span>
-              <span className="label-tech text-[0.58rem]">AUTONOMOUS TRANSPORT UNIT</span>
-            </figcaption>
-          </div>
-          <span
-            className="pointer-events-none absolute -inset-4 -z-10 rounded-xl opacity-60 blur-2xl"
-            style={{ background: "radial-gradient(circle at 70% 30%, var(--violet), transparent 65%)" }}
-          />
-        </figure>
-      </section>
+          </figure>
+        </section>
+      </RevealOnScroll>
 
       {/* ---------- live robot visualization ---------- */}
-      <section className="mt-16 lg:mt-24">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="label-tech text-cyan">WAREHOUSE GRID / LIVE ROBOT ACTIVITY</span>
-            <h2 className="mt-3 font-display text-2xl font-black sm:text-3xl">
-              START <span className="text-cyan">→</span> PATH <span className="text-violet">→</span>{" "}
-              GOAL
-            </h2>
-          </div>
-          <div className="label-tech flex items-center gap-2 text-[0.6rem]">
-            <ScanLine className="h-3.5 w-3.5 text-cyan" />
-            COST = PATH g(n) + ESTIMATE h(n) + CONGESTION PENALTY
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-          <div className="panel corner-frame relative overflow-hidden p-2 sm:p-4">
-            <WarehouseView
-              warehouse={warehouse}
-              congestion={congestion}
-              path={plan.path}
-              robot={pos}
-              start={start}
-              goal={goal}
-              goalLabel="B7"
-            />
-            {arrived ? (
-              <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2">
-                <span
-                  className="label-tech rounded-sm border border-success/60 px-3 py-1.5 text-success"
-                  style={{ boxShadow: "var(--glow-success)" }}
-                >
-                  ROBOT ARRIVED AT TARGET
-                </span>
-              </div>
-            ) : null}
+      <RevealOnScroll>
+        <section className="mt-16 lg:mt-24">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="label-tech text-cyan">WAREHOUSE GRID / LIVE ROBOT ACTIVITY</span>
+              <h2 className="mt-3 font-display text-2xl font-black sm:text-3xl">
+                START <span className="text-cyan">→</span> PATH <span className="text-violet">→</span>{" "}
+                GOAL
+              </h2>
+            </div>
+            <div className="label-tech flex items-center gap-2 text-[0.6rem]">
+              <ScanLine className="h-3.5 w-3.5 text-cyan" />
+              COST = PATH g(n) + ESTIMATE h(n) + CONGESTION PENALTY
+            </div>
           </div>
 
-          {/* HUD integrated into the visualization column */}
-          <div className="space-y-2.5">
-            {[
-              { k: "ROBOT ID", v: "R01", tone: "text-cyan" },
-              { k: "STATUS", v: arrived ? "IDLE / DOCKED" : "ACTIVE", tone: "text-success" },
-              { k: "START", v: "A1" },
-              { k: "TARGET", v: "B7" },
-              { k: "PATH", v: plan.found ? "FOUND" : "CALCULATING", tone: "text-success" },
-              { k: "CONGESTION", v: "LOW", tone: "text-cyan" },
-              { k: "ALGORITHM", v: "A*", tone: "text-violet" },
-              { k: "MODE", v: "AUTONOMOUS" },
-              { k: "ROUTE STEPS", v: String(plan.steps) },
-              { k: "ROUTE COST", v: plan.cost.toFixed(1) },
-            ].map((row, i) => (
-              <div
-                key={row.k}
-                className="flex items-center justify-between border-b border-cyan/12 pb-2 last:border-0"
-                style={{ animation: `rise-in 0.7s var(--ease-smooth) ${i * 0.05}s both` }}
-              >
-                <span className="label-tech text-[0.58rem]">{row.k}</span>
-                <span className={`font-mono text-xs font-medium ${row.tone ?? "text-foreground"}`}>
-                  {row.v}
-                </span>
+          <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="panel corner-frame relative overflow-hidden p-2 sm:p-4">
+              <WarehouseView
+                warehouse={warehouse}
+                congestion={congestion}
+                path={plan.path}
+                robotRef={robotRef}
+                start={start}
+                goal={goal}
+                goalLabel="B7"
+              />
+              {arrived ? (
+                <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2">
+                  <span
+                    className="label-tech rounded-sm border border-success/60 px-3 py-1.5 text-success"
+                    style={{ boxShadow: "var(--glow-success)" }}
+                  >
+                    ROBOT ARRIVED AT TARGET
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            {/* HUD integrated into the visualization column */}
+            <RevealOnScroll cascade>
+              <div className="space-y-2.5">
+                {[
+                  { k: "ROBOT ID", v: "R01", tone: "text-cyan" },
+                  { k: "STATUS", v: arrived ? "IDLE / DOCKED" : "ACTIVE", tone: "text-success" },
+                  { k: "START", v: "A1" },
+                  { k: "TARGET", v: "B7" },
+                  { k: "PATH", v: plan.found ? "FOUND" : "CALCULATING", tone: "text-success" },
+                  { k: "CONGESTION", v: "LOW", tone: "text-cyan" },
+                  { k: "ALGORITHM", v: "A*", tone: "text-violet" },
+                  { k: "MODE", v: "AUTONOMOUS" },
+                  { k: "ROUTE STEPS", v: String(plan.steps) },
+                  { k: "ROUTE COST", v: plan.cost.toFixed(1) },
+                ].map((row) => (
+                  <div
+                    key={row.k}
+                    className="flex items-center justify-between border-b border-cyan/12 pb-2 last:border-0"
+                  >
+                    <span className="label-tech text-[0.58rem]">{row.k}</span>
+                    <span className={`font-mono text-xs font-medium ${row.tone ?? "text-foreground"}`}>
+                      {row.v}
+                    </span>
+                  </div>
+                ))}
+                <p className="pt-2 text-xs text-muted-foreground">
+                  Route recalculated by the A* engine in the browser — the robot follows every grid node.
+                </p>
               </div>
-            ))}
-            <p className="pt-2 text-xs text-muted-foreground">
-              Route recalculated by the A* engine in the browser — the robot follows every grid node.
-            </p>
+            </RevealOnScroll>
           </div>
-        </div>
-      </section>
+        </section>
+      </RevealOnScroll>
 
       {/* ---------- pipeline teaser ---------- */}
-      <section className="mt-16 grid gap-4 sm:grid-cols-3">
-        {[
-          {
-            Icon: RouteIcon,
-            t: "GRID GRAPH",
-            d: "The warehouse floor becomes a graph of walkable cells, shelves and obstacles.",
-          },
-          {
-            Icon: Cpu,
-            t: "CONGESTION PREDICTION",
-            d: "Historical movement data marks aisles that are likely to be busy.",
-          },
-          {
-            Icon: ScanLine,
-            t: "A* WITH PENALTY",
-            d: "Search picks the route with the lowest total cost, not just the shortest one.",
-          },
-        ].map(({ Icon, t, d }, i) => (
-          <article
-            key={t}
-            className="panel corner-frame p-5 transition-all duration-500 hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]"
-            style={{ animation: `rise-in 0.8s var(--ease-smooth) ${0.1 * i}s both` }}
-          >
-            <Icon className="h-5 w-5 text-cyan" />
-            <h3 className="mt-3 font-display text-sm font-bold">{t}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{d}</p>
-          </article>
-        ))}
+      <RevealOnScroll cascade>
+        <section className="mt-16 grid gap-4 sm:grid-cols-3">
+          {[
+            {
+              Icon: RouteIcon,
+              t: "GRID GRAPH",
+              d: "The warehouse floor becomes a graph of walkable cells, shelves and obstacles.",
+            },
+            {
+              Icon: Cpu,
+              t: "CONGESTION PREDICTION",
+              d: "Historical movement data marks aisles that are likely to be busy.",
+            },
+            {
+              Icon: ScanLine,
+              t: "A* WITH PENALTY",
+              d: "Search picks the route with the lowest total cost, not just the shortest one.",
+            },
+          ].map(({ Icon, t, d }) => (
+            <article
+              key={t}
+              className="panel corner-frame p-5 transition-all duration-500 hover:border-cyan/50 hover:shadow-[var(--glow-cyan)] hover:-translate-y-1.5 h-full"
+            >
+              <Icon className="h-5 w-5 text-cyan" />
+              <h3 className="mt-3 font-display text-sm font-bold">{t}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{d}</p>
+            </article>
+          ))}
+        </section>
+      </RevealOnScroll>
+
+      {/* ---------- team section ---------- */}
+      <section className="mt-16 lg:mt-24 mb-10">
+        <RevealOnScroll>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="label-tech text-cyan">PROJECT DEVELOPMENT TEAM</span>
+              <h2 className="mt-3 font-display text-2xl font-black sm:text-3xl">
+                CORE <span className="text-cyan">MEMBERS</span>
+              </h2>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll cascade>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { name: "P. Narendra", img: "/narendra.jpg.png" },
+              { name: "K. Charan Teja", img: "/cheran.jpg.png" },
+              { name: "M. Nagachaithnya", img: "/nani.jpg.png" },
+              { name: "K. Lavanya", img: "/lav.jpg.png" },
+              { name: "V. Stephen", img: "/stephen.jpg.png" },
+            ].map((member) => (
+              <article
+                key={member.name}
+                className="panel corner-frame overflow-hidden p-4 group transition-all duration-500 hover:border-cyan/60 hover:shadow-[var(--glow-cyan)] hover:-translate-y-2 hover:bg-cyan/5 h-full"
+              >
+                <div className="aspect-square w-full overflow-hidden rounded-sm border border-cyan/20 bg-muted/30 relative">
+                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,var(--cyan)_100%)] opacity-0 mix-blend-screen transition-opacity duration-500 group-hover:opacity-30 z-10 pointer-events-none" />
+                  <img
+                    src={member.img}
+                    alt={member.name}
+                    className="team-image h-full w-full object-cover group-hover:!scale-[1.05]"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="mt-4 text-center">
+                  <h3 className="font-display text-[0.95rem] font-bold tracking-wide transition-colors group-hover:text-cyan">{member.name}</h3>
+                  <span className="label-tech mt-1 inline-block text-[0.55rem] text-cyan transition-transform group-hover:scale-105">PROJECT TEAM</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </RevealOnScroll>
       </section>
     </div>
   );

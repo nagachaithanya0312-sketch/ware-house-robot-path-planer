@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { NodeNetwork, type NetNode } from "@/components/NodeNetwork";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export const Route = createFileRoute("/architecture")({
   head: () => ({
@@ -67,32 +68,38 @@ const links = [
 function Architecture() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:py-16">
-      <SectionHeading
-        tag="SYSTEM ARCHITECTURE"
-        title={
-          <>
-            DATA FLOW OF THE <span className="text-gradient">NAVIGATION SYSTEM</span>
-          </>
-        }
-        lead="Every component of the project, wired as one network. Hover a node to see its role and highlight its connections."
-      />
+      <RevealOnScroll>
+        <SectionHeading
+          tag="SYSTEM ARCHITECTURE"
+          title={
+            <>
+              DATA FLOW OF THE <span className="text-gradient">NAVIGATION SYSTEM</span>
+            </>
+          }
+          lead="Every component of the project, wired as one network. Hover a node to see its role and highlight its connections."
+        />
+      </RevealOnScroll>
 
-      <div className="panel corner-frame mt-10 p-4 sm:p-8">
-        <NodeNetwork nodes={nodes} links={links} height={640} />
-      </div>
+      <RevealOnScroll>
+        <div className="panel corner-frame mt-10 p-4 sm:p-8">
+          <NodeNetwork nodes={nodes} links={links} height={640} />
+        </div>
+      </RevealOnScroll>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {[
-          { t: "PYTHON BRANCH", d: "Historical data → Python → congestion prediction." },
-          { t: "JAVA BRANCH", d: "Grid graph + robot task → Java → A* search." },
-          { t: "MERGE", d: "A* + congestion penalty → final route → robot → shelf." },
-        ].map((b) => (
-          <article key={b.t} className="panel p-5">
-            <p className="label-tech text-cyan">{b.t}</p>
-            <p className="mt-2 text-sm text-secondary-foreground/90">{b.d}</p>
-          </article>
-        ))}
-      </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          {[
+            { t: "PYTHON BRANCH", d: "Historical data → Python → congestion prediction." },
+            { t: "JAVA BRANCH", d: "Grid graph + robot task → Java → A* search." },
+            { t: "MERGE", d: "A* + congestion penalty → final route → robot → shelf." },
+          ].map((b, i) => (
+            <RevealOnScroll key={b.t} delay={i * 75}>
+              <article className="panel p-5 group transition-all duration-500 hover:border-cyan/50 hover:shadow-[var(--glow-cyan)] hover:-translate-y-1.5 h-full">
+                <p className="label-tech text-cyan transition-colors group-hover:text-white">{b.t}</p>
+                <p className="mt-2 text-sm text-secondary-foreground/90">{b.d}</p>
+              </article>
+            </RevealOnScroll>
+          ))}
+        </div>
     </div>
   );
 }

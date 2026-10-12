@@ -15,6 +15,7 @@ export type ViewProps = {
   path?: Cell[];
   pathProgress?: number; // 0..1 reveal of final route
   robot?: { x: number; y: number } | null;
+  robotRef?: React.RefObject<SVGGElement | null>;
   start?: Cell | null;
   goal?: Cell | null;
   goalLabel?: string | null;
@@ -34,6 +35,7 @@ export function WarehouseView({
 
   pathProgress = 1,
   robot = null,
+  robotRef,
   start = null,
   goal = null,
   goalLabel = null,
@@ -351,14 +353,14 @@ export function WarehouseView({
       ) : null}
 
       {/* robot */}
-      {robot ? <RobotSprite x={robot.x * S + S / 2} y={robot.y * S + S / 2} /> : null}
+      {robotRef || robot ? <RobotSprite innerRef={robotRef} x={robot ? robot.x * S + S / 2 : 0} y={robot ? robot.y * S + S / 2 : 0} /> : null}
     </svg>
   );
 }
 
-export function RobotSprite({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
+export function RobotSprite({ x, y, scale = 1, innerRef }: { x: number; y: number; scale?: number; innerRef?: React.RefObject<SVGGElement | null> }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
+    <g ref={innerRef} transform={innerRef ? undefined : `translate(${x} ${y}) scale(${scale})`}>
       <circle r="15" fill="var(--cyan)" opacity="0.12" />
       <rect x="-9" y="-8" width="18" height="16" rx="3" fill="var(--color-deepblue)" stroke="var(--cyan)" strokeWidth="1.3" />
       <rect x="-5.5" y="-4.5" width="4" height="4" fill="var(--cyan)" />
@@ -374,21 +376,27 @@ export function RobotSprite({ x, y, scale = 1 }: { x: number; y: number; scale?:
 
 /**
  * Smoothly walks a robot along grid nodes with easing at both ends.
- * Returns the interpolated position and the arrival flag — never teleports.
+ * Uses direct DOM manipulation to prevent React re-renders on every frame.
  */
-export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+export function useRobotWalk(path: Cell[], running: boolean, speed = 2.5) {
+  const ref = useRef<SVGGElement>(null);
   const [arrived, setArrived] = useState(false);
 
   useEffect(() => {
     if (!path.length) {
-      setPos(null);
       setArrived(false);
       return;
     }
-    setPos({ x: path[0]!.x, y: path[0]!.y });
+    
+    const S = 28;
     setArrived(false);
-    if (!running || path.length < 2) return;
+    
+    if (!running || path.length < 2) {
+      if (ref.current) {
+        ref.current.style.transform = `translate(${path[0]!.x * S + S / 2}px, ${path[0]!.y * S + S / 2}px)`;
+      }
+      return;
+    }
 
     let raf = 0;
     let t0 = 0;
@@ -400,16 +408,23 @@ export function useRobotWalk(path: Cell[], running: boolean, speed = 4.2) {
       const u = Math.min(1, (ts - t0) / (total * 1000));
       const d = ease(u) * (path.length - 1);
       const i = Math.min(path.length - 2, Math.floor(d));
-      const f = d - i;
+      const f = Math.max(0, d - i);
       const a = path[i]!;
       const b = path[i + 1]!;
-      setPos({ x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f });
+      const cx = a.x + (b.x - a.x) * f;
+      const cy = a.y + (b.y - a.y) * f;
+      
+      if (ref.current) {
+        ref.current.style.transform = `translate(${cx * S + S / 2}px, ${cy * S + S / 2}px)`;
+      }
+      
       if (u < 1) raf = requestAnimationFrame(tick);
       else setArrived(true);
     };
     raf = requestAnimationFrame(tick);
+    
     return () => cancelAnimationFrame(raf);
   }, [path, running, speed]);
 
-  return { pos, arrived };
+  return { ref, arrived };
 }

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Bot, Grid3x3, Flame, Radar, Route as RouteIcon, Sigma } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { NodeNetwork, type NetNode } from "@/components/NodeNetwork";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
@@ -97,32 +98,38 @@ const links = [
 function HowItWorks() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:py-16">
-      <SectionHeading
-        tag="PROCESS PIPELINE"
-        title={
-          <>
-            HOW THE SYSTEM <span className="text-gradient">THINKS</span>
-          </>
-        }
-        lead="Hover any stage to see what happens there. Data pulses show the direction information travels through the planner."
-      />
+      <RevealOnScroll>
+        <SectionHeading
+          tag="PROCESS PIPELINE"
+          title={
+            <>
+              HOW THE SYSTEM <span className="text-gradient">THINKS</span>
+            </>
+          }
+          lead="Hover any stage to see what happens there. Data pulses show the direction information travels through the planner."
+        />
+      </RevealOnScroll>
 
-      <div className="panel corner-frame mt-10 p-4 sm:p-8">
-        <NodeNetwork nodes={nodes} links={links} height={560} />
-      </div>
+      <RevealOnScroll>
+        <div className="panel corner-frame mt-10 p-4 sm:p-8">
+          <NodeNetwork nodes={nodes} links={links} height={560} />
+        </div>
+      </RevealOnScroll>
 
-      <div className="panel mt-8 p-6">
-        <p className="label-tech text-cyan">SELECTION RULE</p>
-        <p className="mt-3 font-display text-base font-bold sm:text-xl">
-          TOTAL ROUTE COST = PATH COST <span className="text-cyan">g(n)</span> + ESTIMATED DISTANCE{" "}
-          <span className="text-violet">h(n)</span> + CONGESTION PENALTY
-        </p>
-        <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
-          g(n) is the cost already travelled, h(n) is the estimated remaining distance to the shelf
-          (Manhattan distance on the grid), and the penalty makes predicted-busy cells more expensive
-          to enter. The route with the lowest total is the one the robot drives.
-        </p>
-      </div>
+      <RevealOnScroll>
+        <div className="panel mt-8 p-6 group transition-all duration-500 hover:border-cyan/50 hover:shadow-[var(--glow-cyan)]">
+          <p className="label-tech text-cyan">SELECTION RULE</p>
+          <p className="mt-3 font-display text-base font-bold sm:text-xl">
+            TOTAL ROUTE COST = PATH COST <span className="text-cyan">g(n)</span> + ESTIMATED DISTANCE{" "}
+            <span className="text-violet">h(n)</span> + CONGESTION PENALTY
+          </p>
+          <p className="mt-3 max-w-3xl text-sm text-muted-foreground group-hover:text-secondary-foreground transition-colors">
+            g(n) is the cost already travelled, h(n) is the estimated remaining distance to the shelf
+            (Manhattan distance on the grid), and the penalty makes predicted-busy cells more expensive
+            to enter. The route with the lowest total is the one the robot drives.
+          </p>
+        </div>
+      </RevealOnScroll>
     </div>
   );
 }

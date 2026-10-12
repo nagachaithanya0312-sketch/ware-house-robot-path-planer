@@ -1,13 +1,24 @@
 /** Pixel-inspired robot / path logo with a slow scan + path sweep loop. */
-export function BrandLogo({ size = 34 }: { size?: number }) {
+export function BrandLogo({ size = 42 }: { size?: number }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 40 40"
       aria-hidden
-      className="shrink-0 drop-shadow-[0_0_10px_oklch(0.79_0.14_195/0.45)]"
+      className="shrink-0 drop-shadow-[0_0_10px_oklch(0.79_0.14_195/0.45)] relative"
     >
+      <defs>
+        <linearGradient id="logo-sweep" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="transparent" />
+          <stop offset="50%" stopColor="var(--cyan)" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="transparent" />
+        </linearGradient>
+        <mask id="logo-mask">
+          <rect x="2" y="2" width="36" height="36" rx="6" fill="white" />
+        </mask>
+      </defs>
+
       <rect
         x="2"
         y="2"
@@ -38,6 +49,11 @@ export function BrandLogo({ size = 34 }: { size?: number }) {
         <animate attributeName="stroke-dashoffset" values="36;0" dur="4.5s" repeatCount="indefinite" />
       </path>
       <path d="M7 31h8l5-4h13" fill="none" stroke="var(--cyan)" strokeOpacity="0.25" strokeWidth="1.2" />
+      
+      {/* Smooth traveling light sweep across logo */}
+      <rect x="-40" y="0" width="20" height="40" fill="url(#logo-sweep)" mask="url(#logo-mask)" style={{ mixBlendMode: 'screen' }}>
+        <animate attributeName="x" values="-40;60" dur="4s" repeatCount="indefinite" />
+      </rect>
     </svg>
   );
 }

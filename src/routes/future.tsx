@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Bot, Cpu, ShieldAlert, Wifi } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { NodeNetwork, type NetNode } from "@/components/NodeNetwork";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export const Route = createFileRoute("/future")({
   head: () => ({
@@ -88,24 +89,28 @@ const links = [
 function FuturePage() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:py-16">
-      <SectionHeading
-        tag="FUTURE SCOPE"
-        title={
-          <>
-            FUTURE WAREHOUSE <span className="text-gradient">INTELLIGENCE</span>
-          </>
-        }
-        lead="The current planner handles one robot on predicted congestion. These are the directions that turn it into a full fleet control system."
-      />
-
-      <div className="panel corner-frame mt-10 p-4 sm:p-8">
-        <NodeNetwork
-          nodes={nodes}
-          links={links}
-          height={600}
-          center={{ label: "FUTURE WAREHOUSE INTELLIGENCE", caption: "ROADMAP CORE" }}
+      <RevealOnScroll>
+        <SectionHeading
+          tag="FUTURE SCOPE"
+          title={
+            <>
+              FUTURE WAREHOUSE <span className="text-gradient">INTELLIGENCE</span>
+            </>
+          }
+          lead="The current planner handles one robot on predicted congestion. These are the directions that turn it into a full fleet control system."
         />
-      </div>
+      </RevealOnScroll>
+
+      <RevealOnScroll>
+        <div className="panel corner-frame mt-10 p-4 sm:p-8">
+          <NodeNetwork
+            nodes={nodes}
+            links={links}
+            height={600}
+            center={{ label: "FUTURE WAREHOUSE INTELLIGENCE", caption: "ROADMAP CORE" }}
+          />
+        </div>
+      </RevealOnScroll>
     </div>
   );
 }

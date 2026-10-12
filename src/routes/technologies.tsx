@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BrainCircuit, Coffee, Grid3x3, Radar, Boxes } from "lucide-react";
 import { SectionHeading } from "@/components/SectionHeading";
 import { NodeNetwork, type NetNode } from "@/components/NodeNetwork";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export const Route = createFileRoute("/technologies")({
   head: () => ({
@@ -89,24 +90,28 @@ const links = [
 function Technologies() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6 lg:py-16">
-      <SectionHeading
-        tag="TECHNOLOGY ECOSYSTEM"
-        title={
-          <>
-            ONE ENGINE, <span className="text-gradient">FIVE DISCIPLINES</span>
-          </>
-        }
-        lead="Each subject contributes a part of the planner. Hover a technology to see how it connects to the core engine."
-      />
-
-      <div className="panel corner-frame mt-10 p-4 sm:p-8">
-        <NodeNetwork
-          nodes={nodes}
-          links={links}
-          height={600}
-          center={{ label: "WAREHOUSE AI ENGINE", caption: "PATH PLANNING CORE" }}
+      <RevealOnScroll>
+        <SectionHeading
+          tag="TECHNOLOGY ECOSYSTEM"
+          title={
+            <>
+              ONE ENGINE, <span className="text-gradient">FIVE DISCIPLINES</span>
+            </>
+          }
+          lead="Each subject contributes a part of the planner. Hover a technology to see how it connects to the core engine."
         />
-      </div>
+      </RevealOnScroll>
+
+      <RevealOnScroll>
+        <div className="panel corner-frame mt-10 p-4 sm:p-8">
+          <NodeNetwork
+            nodes={nodes}
+            links={links}
+            height={600}
+            center={{ label: "WAREHOUSE AI ENGINE", caption: "PATH PLANNING CORE" }}
+          />
+        </div>
+      </RevealOnScroll>
     </div>
   );
 }

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+
 
 /**
  * Cinematic warehouse opening scene.
@@ -29,9 +31,17 @@ export function IntroScene({ onEnter }: { onEnter: () => void }) {
   return (
     <div
       className={`fixed inset-0 z-[90] overflow-hidden bg-background transition-all duration-1000 ease-out ${
-        leaving ? "scale-[1.08] opacity-0" : "scale-100 opacity-100"
+        leaving ? "scale-[1.08] opacity-0 pointer-events-none" : "scale-100 opacity-100"
       }`}
     >
+      <style>{`
+        @keyframes inner-light-sweep {
+          0% { transform: translateX(-150%); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: translateX(150%); opacity: 0; }
+        }
+      `}</style>
       {/* warehouse environment */}
       <div
         className={`absolute inset-0 transition-opacity duration-[1500ms] ${
@@ -56,18 +66,22 @@ export function IntroScene({ onEnter }: { onEnter: () => void }) {
         </p>
 
         <h1
-          className={`font-display text-[2.1rem] leading-[0.95] font-black tracking-tight transition-all duration-1000 sm:text-6xl lg:text-7xl ${show(4)}`}
+          className={`font-display text-[2.1rem] leading-[0.95] font-black cursor-pointer transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:tracking-[0.08em] hover:scale-[1.01] sm:text-6xl lg:text-7xl group ${show(4)}`}
         >
-          <span className="block">WAREHOUSE</span>
-          <span className="block text-gradient">ROBOT PATH</span>
-          <span className="block">PLANNER</span>
+          <span className="block drop-shadow-[0_0_15px_oklch(0.79_0.14_195/0.3)] text-premium-sweep">WAREHOUSE</span>
+          <span className="block text-gradient drop-shadow-[0_0_20px_oklch(0.79_0.14_195/0.5)] text-premium-sweep">ROBOT PATH</span>
+          <span className="block drop-shadow-[0_0_15px_oklch(0.79_0.14_195/0.3)] text-premium-sweep">PLANNER</span>
         </h1>
 
         <div
-          className={`mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 transition-all duration-1000 ${show(5)}`}
+          className={`mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 transition-all duration-1000 ${stage >= 5 ? 'opacity-100' : 'opacity-0'}`}
         >
-          {["GRID GRAPH", "A* SEARCH", "CONGESTION PREDICTION", "AUTONOMOUS ROUTING"].map((t) => (
-            <span key={t} className="label-tech text-[0.6rem]">
+          {["GRID GRAPH", "A* SEARCH", "CONGESTION PREDICTION", "AUTONOMOUS ROUTING"].map((t, i) => (
+            <span 
+               key={t} 
+               className={`label-tech text-[0.6rem] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${stage >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
+               style={{ transitionDelay: `${i * 120}ms` }}
+            >
               {t}
             </span>
           ))}
@@ -79,9 +93,35 @@ export function IntroScene({ onEnter }: { onEnter: () => void }) {
           WELCOME TO THE INTELLIGENT WAREHOUSE NAVIGATION SYSTEM
         </p>
 
-        <div className={`mt-9 transition-all duration-1000 ${show(7)}`}>
-          <button type="button" onClick={enter} disabled={stage < 7} className="ctrl ctrl-primary px-8 py-3.5 text-[0.78rem]">
-            ENTER APPLICATION
+        <div className={`mt-9 transition-all duration-1000 ${show(7)} relative group`}>
+          {/* Soft ambient background shadow */}
+          <div className="absolute inset-0 -z-10 pointer-events-none rounded-full bg-[var(--cyan)] opacity-10 blur-[12px] transition-all duration-500 group-hover:opacity-30 group-hover:blur-xl" />
+          
+          <button
+            type="button"
+            onClick={enter}
+            disabled={stage < 7}
+            className="relative overflow-hidden rounded-full p-[1px] transition-transform duration-300 active:scale-95 disabled:pointer-events-none disabled:opacity-0 group-hover:scale-[1.02] bg-background"
+          >
+            {/* Animated Border Gradient with multiple traveling lights */}
+            <span 
+               className="absolute inset-0 animate-[spin_1.8s_linear_infinite] opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+               style={{
+                 background: "conic-gradient(from 0deg, transparent 0%, #FFFFFF 5%, #87CEFA 10%, #22D3EE 15%, #3B82F6 20%, #C4B5FD 25%, #FFFFFF 30%, transparent 35%, transparent 50%, #FFFFFF 55%, #87CEFA 60%, #22D3EE 65%, #3B82F6 70%, #C4B5FD 75%, #FFFFFF 80%, transparent 85%)"
+               }}
+            />
+            
+            {/* Inner Button Content */}
+            <div className="relative flex items-center justify-center gap-3 rounded-full bg-background/95 px-10 py-3.5 backdrop-blur-sm transition-colors group-hover:bg-background/90 overflow-hidden shadow-[inset_0_0_12px_rgba(255,255,255,0.02)] group-hover:shadow-[inset_0_0_20px_rgba(56,189,248,0.15)]">
+               {/* Colorful Moving Light */}
+               <div className="absolute inset-0 opacity-40 group-hover:opacity-85 mix-blend-screen pointer-events-none transition-opacity duration-500">
+                  <div className="absolute top-0 left-0 h-full w-[100%] animate-[inner-light-sweep_2.5s_linear_infinite] bg-[linear-gradient(90deg,transparent_0%,rgba(173,216,230,0.15)_20%,rgba(135,206,250,0.3)_40%,rgba(34,211,238,0.4)_60%,rgba(255,255,255,0.4)_75%,rgba(59,130,246,0.2)_90%,transparent_100%)]" />
+               </div>
+               
+               <span className="relative z-10 font-mono text-[0.78rem] tracking-[0.2em] text-secondary-foreground transition-colors duration-500 group-hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(125,211,252,0.6)]">
+                 ENTER APPLICATION
+               </span>
+            </div>
           </button>
         </div>
       </div>
